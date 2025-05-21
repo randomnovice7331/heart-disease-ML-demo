@@ -1,4 +1,4 @@
-import os
+ import os
 import joblib
 import pandas as pd
 import streamlit as st
@@ -104,7 +104,7 @@ fbs      = st.selectbox(
 )
 
 restecg  = st.selectbox(
-    "Resting electrocardiographic results [Normal=0, ST elevation or depression of > 0.05 mV = 1, Left ventricular hypertrophy = 2]",
+    "Resting ECG results [Normal=0, ST elevation or depression of > 0.05 mV = 1, Left ventricular hypertrophy = 2]",
     options=[0, 1, 2],
     index=2
 )
