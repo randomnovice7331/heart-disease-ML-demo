@@ -173,5 +173,5 @@ proba = pipeline.predict_proba(row)[0,1]
 # probas = pipeline.predict_proba(row)[0]   # npr. array([0.062, 0.938])
 # print(f"P(0) = {probas[0]:.3f}, P(1) = {probas[1]:.3f}")
 
-st.write(f"**Predviđena klasa [healthy=0, sick=1]: ** {label}")
+st.write(f"**Predviđena klasa [healthy=0, sick=1]:**  {label}")
 st.write(f"**Vjerojatnost bolesti:** {proba:.3f}")
