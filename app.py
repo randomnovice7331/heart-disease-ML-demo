@@ -3,6 +3,62 @@ import joblib
 import pandas as pd
 import streamlit as st
 
+# ————————————————
+# 0) Definicija custom transformera (isti kod kao u treniranju)
+from copulas.multivariate import GaussianMultivariate
+from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np
+from sklearn.neighbors import KernelDensity
+from sklearn.preprocessing import StandardScaler
+
+class GaussianCopulaImputer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.model = GaussianMultivariate()
+    def fit(self, X, y=None):
+        self.model.fit(X.dropna())
+        self.is_fitted_ = True
+        return self
+    def transform(self, X):
+        df = X.copy()
+        mask = df.isna()
+        samples = pd.DataFrame(self.model.sample(len(df)),
+                               columns=df.columns, index=df.index)
+        for col in df.columns:
+            df.loc[mask[col], col] = samples.loc[mask[col], col]
+        return df
+
+class OldpeakFeatureCreator(BaseEstimator, TransformerMixin):
+    def fit(self, X, y):
+        vals = X['oldpeak'].values
+        def kde_max(v):
+            kde = KernelDensity(kernel='gaussian', bandwidth=1.0).fit(v[:,None])
+            grid = np.linspace(v.min(), v.max(), 1000)[:,None]
+            dens = np.exp(kde.score_samples(grid))
+            peaks = (np.diff(np.sign(np.diff(dens)))<0).nonzero()[0] + 1
+            return grid[peaks[np.argmax(dens[peaks])]][0] if peaks.size else v.mean()
+        self.h_max = kde_max(vals[y==0])
+        self.s_max = kde_max(vals[y==1])
+        self.is_fitted_ = True
+        return self
+    def transform(self, X):
+        df = X.copy()
+        df['oldpeak_healthy_max_dist'] = np.abs(df['oldpeak'] - self.h_max)
+        df['oldpeak_sick_max_dist']    = np.abs(df['oldpeak'] - self.s_max)
+        return df.drop(columns='oldpeak')
+
+class ColumnScaler(BaseEstimator, TransformerMixin):
+    def __init__(self, columns):
+        self.columns = columns
+        self.scaler = StandardScaler()
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns])
+        self.is_fitted_ = True
+        return self
+    def transform(self, X):
+        Xc = X.copy()
+        Xc[self.columns] = self.scaler.transform(Xc[self.columns])
+        return Xc
+
 # 1) Učitaj pipeline
 save_dir      = os.getcwd()  # pretpostavka: radiš iz korijena repozitorija
 pipeline_path = os.path.join(save_dir, "full_pipeline.joblib")
