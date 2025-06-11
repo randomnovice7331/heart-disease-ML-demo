@@ -71,7 +71,7 @@ st.title("Demo: Heart disease prediction")
 col1, col2 = st.columns(2)
 with col1:
     age = st.number_input(
-        "Age of the patient (age)",
+        "Age of the patient (years)",
         min_value=1, max_value=140,
         value=50
     )
