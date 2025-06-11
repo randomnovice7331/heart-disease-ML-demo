@@ -179,5 +179,5 @@ row = pd.DataFrame({
 label = pipeline.predict(row)[0]
 proba = pipeline.predict_proba(row)[0,1]
 
-st.write(f"**Predviđena klasa [healthy=0, sick=1]:**  {label}")
-st.write(f"**Vjerojatnost bolesti:** {proba:.3f}")
+st.write(f"**Predicted class [healthy=0, sick=1]:**  {label}")
+st.write(f"**Probability of disease:** {proba:.3f}")
